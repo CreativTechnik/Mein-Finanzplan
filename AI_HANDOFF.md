@@ -1,9 +1,12 @@
 # AI-Handoff
 
-Stand: 18.09.2026
+Stand: 02.10.2026
 
 ## Aktuelle Aufgabe
 
+- Der bereinigte Quellstand ist öffentlich unter
+  `https://github.com/CreativTechnik/Mein-Finanzplan`; lokale Daten, Build-Artefakte,
+  Agentenwerkzeuge und die frühere persönliche Commit-Historie wurden nicht veröffentlicht.
 - `Mein Finanzplan v0.15.2` (Build 20) ist gebaut: Duplikat-Erkennung beim CSV-Import,
   Menüleisten-Zusammenfassung und Belege an Buchungen. Artefakte liegen unter
   `native/releases/v0.15.2/` (App, DMG, Vollinstaller, Update-PKG, Weitergabe-ZIP).
@@ -64,6 +67,11 @@ Stand: 18.09.2026
 
 ## Tests
 
+- GitHub-Stand am 02.10.2026: `swift run --scratch-path .build-verify-github VerifyFinanceCore`
+  bestanden (**129/129**, 0 Fehler). Ein vollständiges `swift build` war in der aktuell
+  ausgewählten Command-Line-Tools-Umgebung wegen des fehlenden Apple-Systemplugins
+  `SwiftUIMacros` nicht erneut ausführbar; die letzte vollständige Release-Prüfung bleibt
+  die unten dokumentierte erfolgreiche Prüfung.
 - `swift build`: bestanden.
 - `swift run VerifyFinanceCore`: **129/129**, 0 Fehler (neu: Duplikat-Erkennung, gleiche
   Käufe am selben Tag, Fingerprint-Roundtrip, Menüleisten-Auswahl, Belege inkl. Deduplizierung,

@@ -233,6 +233,7 @@ nur aktive Aufgabe, relevante aktuelle Änderungen, offene Probleme, Architektur
 und ausstehende Prüfungen. Ein Agent ersetzt veraltete Angaben, statt immer neue Historie
 anzuhängen.
 
-Die lokale Git-Historie ist die technische Integrationsgrundlage. Ein GitHub-Remote ist
-optional und derzeit nicht eingerichtet. Die `.gitignore` schützt persönliche
-Datenbanken, lokale Claude-Einstellungen, Build-Caches und Release-Artefakte.
+Die lokale Git-Historie ist die technische Integrationsgrundlage. `origin` verweist auf
+das öffentliche Repository `https://github.com/CreativTechnik/Mein-Finanzplan`.
+Die `.gitignore` schützt persönliche Datenbanken, lokale Agenten-Einstellungen,
+Build-Caches und Release-Artefakte.
