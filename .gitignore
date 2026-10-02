@@ -2,6 +2,7 @@
 .DS_Store
 *.log
 *.icloud
+* 2
 * 2.*
 .env
 .env.*

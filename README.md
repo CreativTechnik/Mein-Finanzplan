@@ -1,12 +1,59 @@
-# Mein Finanzplan
+<div align="center">
+  <img src="native/Resources/AppIcon-Master.png" width="168" alt="Mein Finanzplan App-Icon">
+  <h1>Mein Finanzplan</h1>
+  <p><strong>Lokale Haushalts- und Liquiditätsplanung für macOS.</strong></p>
+  <p>
+    <img src="https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&amp;logoColor=white" alt="macOS 14 oder neuer">
+    <img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&amp;logoColor=white" alt="Swift 6">
+    <img src="https://img.shields.io/badge/Datenschutz-lokal-1769AA" alt="Daten bleiben lokal">
+    <img src="https://img.shields.io/badge/Version-0.15.2-1572A1" alt="Version 0.15.2">
+  </p>
+</div>
 
-Eine vollständig lokal laufende Haushalts- und Liquiditätsplanung für macOS. Die Anwendung beantwortet zuerst die Frage: Wie viel Geld ist heute frei verfügbar, wenn alle bekannten Zahlungen bis zur nächsten verlässlichen Einnahme und der gewünschte Mindest-Puffer geschützt bleiben?
+**Mein Finanzplan** beantwortet eine praktische Frage: Wie viel Geld ist heute wirklich frei verfügbar, wenn alle bekannten Zahlungen bis zur nächsten verlässlichen Einnahme und der gewünschte Mindestpuffer geschützt bleiben?
 
-Die Ausgangslogik wurde aus einer privaten Haushalts-Arbeitsmappe übernommen und in ein wartbares Konten-, Buchungs- und Regelmodell überführt. Die ursprüngliche Excel-Datei ist nicht Bestandteil dieses Repositories.
+Die App arbeitet vollständig lokal. Es gibt keine Cloud, kein Benutzerkonto, kein Tracking und keine automatische Bankverbindung.
 
-## Native macOS-App (empfohlen)
+> [!IMPORTANT]
+> Dieses Repository enthält zwei getrennte Anwendungen mit eigenen Datenbanken. Die native macOS-App ist der empfohlene Produktpfad; die Browser-Variante ist eine eigenständige lokale Alternative. Datenbanken sind nicht direkt austauschbar.
 
-Im Ordner `native/` liegt eine eigenständige SwiftUI-App, die direkt als Programm startet statt im Browser. Sie teilt die fachliche Logik (Konten, Buchungen, Wiederholungen, Liquiditätsberechnung), nutzt aber eine eigene, vom Browser-Server unabhängige lokale Datenbank, damit nichts von der bisherigen Arbeit verloren geht.
+## Funktionsumfang
+
+- Dashboard mit frei verfügbarem Betrag, Wochenbedarf und 90-Tage-Vorschau
+- mehrere Konten mit Ist-Saldo, Plan-Saldo und individuellem Mindestpuffer
+- Einnahmen, Ausgaben und vermögensneutrale Umbuchungen
+- geplante, gebuchte und stornierte Buchungen
+- monatliche, wöchentliche, jährliche und frei definierte Wiederholungen
+- Kategorien, Unterkategorien und Monatsbudgets mit Plan-Ist-Vergleich
+- Zeitachse, Statistiken und Warnungen bei Puffer-Unterschreitungen
+- CSV-Import mit Vorschau und Erkennung sicherer oder möglicher Duplikate
+- lokale Belege an Buchungen: PDF, JPEG, PNG, HEIC und TIFF
+- Menüleisten-Zusammenfassung mit Privatsphäre im gesperrten Zustand
+- JSON-Sicherung und Wiederherstellung
+- heller und dunkler Modus sowie reduzierte Bewegung
+
+## Varianten
+
+| Variante | Status | Technik | Datenhaltung |
+|---|---|---|---|
+| Native macOS-App | empfohlen | SwiftUI, AppKit, Apple Charts | lokale SQLite-Datenbank |
+| Lokale Browser-App | ergänzend | React, TypeScript, Fastify | separate lokale SQLite-Datenbank |
+
+## Native macOS-App starten
+
+Voraussetzungen:
+
+- macOS 14 oder neuer
+- Swift 6.2 oder neuer
+- Apple Command Line Tools beziehungsweise Xcode
+
+```bash
+cd native
+swift build
+swift run MeinFinanzplan
+```
+
+Ein lokales App-Bundle erzeugen:
 
 ```bash
 cd native
@@ -14,32 +61,16 @@ cd native
 open "dist/Mein Finanzplan.app"
 ```
 
-Das Skript baut eine Release-Version und verpackt sie als doppelklickbares `.app`-Bundle (lokal ad-hoc signiert). Wer die App dauerhaft im Dock/Spotlight haben möchte, kopiert `dist/Mein Finanzplan.app` nach `~/Applications`.
+Die App wird lokal ad-hoc signiert. Für eine öffentliche Verteilung ohne Gatekeeper-Warnung fehlen derzeit Apple Developer ID und Notarisierung.
 
-Details, Architektur und wie die Business-Logik geprüft wird stehen in `native/README.md`.
+Weitere technische Einzelheiten stehen in [`native/README.md`](native/README.md).
 
-## Enthalten
+## Browser-Variante starten
 
-- Dashboard mit heute frei verfügbarem Betrag, Wochenbedarf, nächster verlässlicher Einnahme und 90-Tage-Vorschau
-- Mehrere Konten mit Ist-Saldo, Plan-Saldo und individuellem Mindest-Puffer
-- Einnahmen, Ausgaben und echte Umbuchungen ohne doppelte Vermögenswirkung
-- Geplante, gebuchte und stornierte Buchungen
-- Monatliche, wöchentliche, jährliche und frei definierte Wiederholungsregeln
-- Kategorien, Unterkategorien und Monatsbudgets mit Plan-Ist-Vergleich
-- Zeitachse, Statistik und Warnungen bei Puffer-Unterschreitungen
-- CSV-Import mit Vorschau und Spaltenzuordnung
-- JSON-Datenexport als lokale Sicherung
-- Automatischer heller und dunkler Modus, responsive Darstellung und reduzierte Bewegung
+Voraussetzungen:
 
-## Voraussetzungen
-
-- macOS
 - Node.js 22.13 oder neuer
 - npm
-
-Die getestete Entwicklungsumgebung verwendet Node.js 26.7.0.
-
-## Produktionsbetrieb
 
 ```bash
 npm install
@@ -47,90 +78,108 @@ npm run build
 npm start
 ```
 
-Danach im Browser öffnen:
+Anschließend ist die Anwendung unter [`http://127.0.0.1:4178`](http://127.0.0.1:4178) erreichbar. Der Server bindet standardmäßig ausschließlich an den eigenen Mac.
 
-```text
-http://127.0.0.1:4178
-```
-
-Der Server bindet standardmäßig nur an den eigenen Mac. Es gibt keine Cloud, kein Login, keine Bankverbindung und keine Hintergrund-Synchronisation.
-
-## Späterer Zugriff im Heimnetz
-
-Die Oberfläche ist bereits für schmale Browserfenster und Mobilgeräte ausgelegt. Für einen bewussten Test im eigenen, vertrauenswürdigen WLAN kann der Produktionsserver so im lokalen Netz freigegeben werden:
-
-```bash
-HOST=0.0.0.0 npm start
-```
-
-Danach wird auf dem Mobilgerät die lokale IP-Adresse des Macs mit Port 4178 geöffnet. Dieser Modus besitzt absichtlich kein Login und sollte deshalb nur kurzzeitig in einem vertrauenswürdigen Heimnetz verwendet werden. Standardmäßig bleibt die App sicher auf `127.0.0.1` beschränkt.
-
-## Entwicklung
+Für die Entwicklung:
 
 ```bash
 npm run dev
 ```
 
-Der Entwicklungsmodus startet den API-Server und Vite gemeinsam. Für den täglichen Betrieb ist der Produktionsmodus sparsamer, weil kein Dateiwächter und keine Entwicklungswerkzeuge aktiv sind.
-
-## Tests
+### Bewusster Zugriff im Heimnetz
 
 ```bash
-npm test
-npm run check
+HOST=0.0.0.0 npm start
 ```
 
-`npm run check` führt alle Logik- und API-Tests sowie den vollständigen TypeScript- und Produktions-Build aus.
+> [!WARNING]
+> Die Browser-App besitzt kein Login. Den Netzwerkmodus nur kurzfristig in einem vertrauenswürdigen lokalen Netz verwenden und niemals ungeprüft ins Internet freigeben.
 
-## Lokale Daten
+## Lokale Daten und Sicherungen
 
-Die SQLite-Datei liegt standardmäßig hier:
+| Anwendung | Standardpfad |
+|---|---|
+| Native App | `~/Library/Application Support/MeinFinanzplan/finanzplan.sqlite` |
+| Browser-App | `data/finanzplan.sqlite` |
 
-```text
-data/finanzplan.sqlite
-```
+Persönliche Datenbanken, Exporte, Belege und Build-Artefakte werden nicht versioniert.
 
-Beim ersten Start werden die aus Excel ableitbaren Regeln, Kategorien, Budgets und Planwerte angelegt. Die aktuelle Girokontodeckung war in Excel nicht vorhanden und startet deshalb als zu bestätigende Annahme. Bitte zuerst unter `Konten` prüfen:
-
-1. aktueller Giro-Saldo und Stichtag
-2. tatsächlicher Tagesgeld-Saldo
-3. gewünschte Mindest-Puffer
-4. angenommene Fälligkeitstage der übernommenen Wiederholungen
-
-Unter `Einstellungen` kann jederzeit ein lokaler JSON-Export als Sicherung geladen werden.
+Die native JSON-Sicherung enthält die Zuordnung von Belegen, aber nicht die Belegdateien selbst. Beim Umzug auf einen anderen Mac muss der Ordner `Belege` zusätzlich kopiert werden.
 
 ## Berechnung der freien Summe
 
-Für das primäre Konto wird der Zeitraum bis zur nächsten als verlässlich markierten Einnahme betrachtet. Diese Einnahme selbst wird nicht vorzeitig als Deckung verwendet. Alle davor liegenden Ausgaben und Umbuchungen werden in Datumsreihenfolge verarbeitet. Der größte erwartete Rückgang plus Mindest-Puffer ergibt den heute benötigten Betrag.
+Für das primäre Konto betrachtet die App den Zeitraum bis zur nächsten als verlässlich markierten Einnahme. Diese Einnahme wird nicht vorzeitig als Deckung verwendet. Alle vorher liegenden Ausgaben und Umbuchungen werden chronologisch berücksichtigt.
 
 ```text
 frei verfügbar = max(0, Ist-Saldo - heute benötigter Betrag)
 ```
 
-Wenn kein verlässlicher Zahlungseingang geplant ist, verwendet die App einen konservativen Vorschauzeitraum von 90 Tagen.
+Der heute benötigte Betrag entspricht dem größten erwarteten Rückgang zuzüglich Mindestpuffer. Ohne verlässlichen Zahlungseingang verwendet die App einen konservativen Vorschauzeitraum von 90 Tagen.
 
 ## CSV-Import
 
-Der Import akzeptiert UTF-8-Dateien mit Komma oder Semikolon als Trennzeichen. In der Vorschau werden mindestens Datum, Bezeichnung und Betrag zugeordnet. Negative Beträge werden als Ausgabe, positive Beträge als Einnahme interpretiert. Importierte historische Buchungen verändern einen bereits bestätigten Kontosaldo nicht rückwirkend, fließen aber in Auswertungen ein.
+Der Import akzeptiert UTF-8-Dateien mit Komma oder Semikolon als Trennzeichen. In der Vorschau werden Datum, Bezeichnung und Betrag zugeordnet.
 
-## Batterie und Leistung
+- negative Beträge werden als Ausgaben interpretiert
+- positive Beträge werden als Einnahmen interpretiert
+- sichere Duplikate werden abgewählt
+- mögliche Duplikate werden zur manuellen Prüfung markiert
+- historische Importe verändern einen bestätigten Ist-Saldo nicht rückwirkend
 
-- schlanker lokaler Node-Prozess statt Electron-Rahmen
-- SQLite mit WAL und normaler Synchronisation für kurze Schreibzugriffe
-- keine Hintergrundabfragen und kein Polling
-- Wiederholungen und Prognosen werden nur beim Laden oder nach einer Änderung berechnet
-- statische Produktionsdateien werden im Browser zwischengespeichert
-- Animationen sind kurz und werden bei `Bewegung reduzieren` praktisch deaktiviert
-- direkte Icon-Imports halten den Build klein und vermeiden Tausende unnötige Modultransformationen
+## Tests
 
-Für den sparsamen Alltagsbetrieb immer `npm run build` und danach `npm start` verwenden, nicht `npm run dev`.
+Native Fachlogik:
 
-## Technischer Aufbau
+```bash
+cd native
+swift build
+swift run VerifyFinanceCore
+```
 
-- React und TypeScript für die Oberfläche
-- Vite für den Produktions-Build
-- Fastify als lokaler HTTP-Server auf `127.0.0.1`
-- integriertes `node:sqlite` für die lokale Datenhaltung
-- Node Test Runner für automatisierte Tests
+`VerifyFinanceCore` prüft aktuell 129 Szenarien, darunter Liquidität, Wiederholungen, Umbuchungen, Sicherungs-Roundtrips, CSV-Duplikate, Belege und Pfadvalidierung.
 
-Die fachliche Excel-Auswertung steht in `docs/excel-analysis.md`. Architektur, Datenmodell und Berechnungsregeln stehen in `docs/implementation-plan.md`.
+Browser-Anwendung:
+
+```bash
+npm run check
+```
+
+Der Befehl führt Node-Tests, TypeScript-Prüfung und Produktions-Build aus.
+
+## Architektur
+
+```text
+.
+├── native/
+│   ├── Sources/FinanceCore/          # Fachlogik und SQLite-Persistenz
+│   ├── Sources/MeinFinanzplan/       # SwiftUI-/AppKit-Oberfläche
+│   ├── Sources/VerifyFinanceCore/    # ausführbare Fachprüfungen
+│   └── Resources/                    # helle und dunkle App-Icons
+├── src/                              # React-Oberfläche
+├── server/                           # Fastify, REST und Browser-SQLite
+├── test/                             # Browser-Tests
+├── docs/                             # Analyse und Umsetzungsdokumentation
+└── scripts/                          # Entwicklungswerkzeuge
+```
+
+Vertiefende Dokumentation:
+
+- [Fachliche Ausgangsanalyse](docs/excel-analysis.md)
+- [Architektur und Berechnungsregeln](docs/implementation-plan.md)
+- [Natives Designsystem](native/DESIGN.md)
+
+## Sicherheit und Grenzen
+
+- Keine Cloud-Synchronisierung und kein Online-Banking.
+- Der FinTS/HBCI-Code ist nur ein nicht persistierender Machbarkeitstest und nicht in die App integriert.
+- Belegdateien und Datenbanken liegen lokal unverschlüsselt im Benutzerprofil.
+- Ein App-Start verwendet die echte lokale Datenbank; Tests der Fachlogik arbeiten dagegen mit temporären Datenbanken.
+- Die beiden App-Varianten verwenden unterschiedliche Datenmodelle und Speicherorte.
+
+## Lizenz
+
+Für dieses Repository ist derzeit keine Open-Source-Lizenz hinterlegt. Der öffentlich sichtbare Quellcode darf daher nicht automatisch als frei nutzbar oder weiterverteilbar verstanden werden.
+
+---
+
+Entwickelt von **CreativTechnik**.

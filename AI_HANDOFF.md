@@ -4,6 +4,9 @@ Stand: 02.10.2026
 
 ## Aktuelle Aufgabe
 
+- `README.md` ist für GitHub neu strukturiert: App-Icon, Status-Badges, Variantenvergleich,
+  Schnellstarts, Datenschutz-, Test-, Architektur- und Lizenzhinweise. Produktcode,
+  Datenmodell und Release-Artefakte blieben unverändert.
 - Der bereinigte Quellstand ist öffentlich unter
   `https://github.com/CreativTechnik/Mein-Finanzplan`; lokale Daten, Build-Artefakte,
   Agentenwerkzeuge und die frühere persönliche Commit-Historie wurden nicht veröffentlicht.
@@ -67,6 +70,10 @@ Stand: 02.10.2026
 
 ## Tests
 
+- README am 02.10.2026 über GitHubs GFM-Renderer verarbeitet; alle lokalen Bild- und
+  Dokumentlinks geprüft.
+- Neu aufgetauchte iCloud-Konfliktdateien mit Suffix ` 2` wurden weder gelesen noch
+  versioniert; `.gitignore` schließt nun auch Varianten ohne Dateiendung aus.
 - GitHub-Stand am 02.10.2026: `swift run --scratch-path .build-verify-github VerifyFinanceCore`
   bestanden (**129/129**, 0 Fehler). Ein vollständiges `swift build` war in der aktuell
   ausgewählten Command-Line-Tools-Umgebung wegen des fehlenden Apple-Systemplugins
