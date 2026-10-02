@@ -1,0 +1,38 @@
+# macOS, Logs und lokale Konfiguration
+.DS_Store
+*.log
+*.icloud
+* 2.*
+.env
+.env.*
+!.env.example
+.claude/settings.local.json
+.claude/worktrees/
+
+# Lokale Agenten- und Editor-Werkzeuge
+/.agents/
+/.claude/
+/AI_TASKS/
+/.vscode/tasks.json
+/CLAUDE.md
+/skills-lock.json
+
+# Browser-Build und persönliche Laufzeitdaten
+/node_modules/
+/tools/agent-bridge/node_modules/
+/tools/agent-bridge/*.tgz
+/tools/agent-bridge/*.sqlite*
+/dist/
+/build/
+/data/
+*.tsbuildinfo
+
+# Native Swift-Builds und Release-Artefakte
+/native/.build/
+/native/.build-*/
+/native/.swiftpm/
+/native/dist
+/native/releases/
+/native/output/
+/native/tmp/
+/native/Mein-Finanzplan-Builds.zip

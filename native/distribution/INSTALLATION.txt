@@ -1,0 +1,130 @@
+MEIN FINANZPLAN – INSTALLATION AUF EINEM ANDEREN MAC
+====================================================
+
+Herausgeber: CreativTechnik
+Copyright: © 2026 CreativTechnik
+Version: 0.15.2
+
+Voraussetzungen
+---------------
+- macOS 14 Sonoma oder neuer
+- Apple-Silicon- oder Intel-Mac
+- ungefähr 30 MB freier Speicherplatz
+
+Installation wie bei Filelio – ohne Terminal
+-----------------------------------------
+1. Die ZIP-Datei vollständig entpacken.
+2. Bei einer neuen Installation "Mein Finanzplan.pkg" doppelklicken.
+   Ist Mein Finanzplan bereits installiert, stattdessen
+   "Mein Finanzplan Update.pkg" doppelklicken. Dieses Paket aktualisiert nur
+   eine vorhandene App und führt keine Erstinstallation durch.
+3. Den Schritten des macOS-Installers folgen. Die App im Programme-Ordner wird
+   installiert beziehungsweise aktualisiert.
+4. Danach "Mein Finanzplan" aus dem Programme-Ordner starten.
+5. Beim ersten Start lautet der Standardcode 2026. Unter Einstellungen >
+   App-Schutz kann er geändert werden. Ein eigener Code bleibt bei Updates im
+   macOS-Schlüsselbund erhalten und wird nicht in JSON-Sicherungen exportiert.
+
+Alternativ "Mein Finanzplan.dmg" öffnen und die App in den Programme-Ordner
+ziehen. DMG, App und Universal-Binary sind nun auf dieselbe Weise wie Filelio
+bereinigt und ad-hoc signiert.
+
+Terminal-Fallback bei einer Gatekeeper-Blockade
+------------------------------------------------
+Rechtsklick "Öffnen" reicht bei neueren macOS-Versionen (Sequoia und neuer)
+oft NICHT mehr aus, um eine nicht-notarisierte App zu starten. Der folgende
+Weg über das Terminal umgeht diese Prüfung zuverlässig, weil das Skript nicht
+per Doppelklick über den Finder, sondern direkt über die Kommandozeile
+gestartet wird.
+
+1. Terminal öffnen (Programme > Dienstprogramme > Terminal).
+2. "bash " eintippen (mit Leerzeichen danach), dann die Datei
+   "INSTALLIEREN.command" aus dem entpackten Ordner in das Terminal-Fenster
+   ziehen und Enter drücken.
+3. Das Skript prüft SHA-256-Prüfsumme und Code-Signatur der DMG, installiert
+   danach die geprüfte App in deinen persönlichen Programme-Ordner und
+   entfernt automatisch das Quarantäne-Merkmal.
+4. Die App startet danach automatisch.
+
+Wichtig: Nicht nur die DMG weitergeben. Die vollständige ZIP-Datei muss übertragen
+und auf dem Ziel-Mac entpackt werden, damit Installer und Prüfsumme vorhanden sind.
+
+Eine vorhandene Version wird nicht gelöscht, sondern mit Datum als Sicherung
+neben der neuen App abgelegt.
+
+Alternative: Doppelklick-Installation
+--------------------------------------
+1. "Mein Finanzplan.dmg" doppelklicken.
+2. "Mein Finanzplan" in den Ordner "Programme" ziehen.
+3. Das Disk-Image im Finder auswerfen.
+4. Im Programme-Ordner mit der rechten Maustaste auf "Mein Finanzplan" klicken
+   und "Öffnen" wählen, macOS-Rückfrage mit "Öffnen" bestätigen.
+
+Falls macOS trotzdem meldet, die App könne nicht geöffnet werden oder sei
+beschädigt: Systemeinstellungen > Datenschutz & Sicherheit öffnen, ganz nach
+unten scrollen. Dort erscheint nach dem ersten blockierten Start ein Hinweis
+zu "Mein Finanzplan" mit einem Knopf "Trotzdem öffnen" – anklicken und
+bestätigen. Erscheint kein solcher Knopf, bitte den Terminal-Weg oben nutzen.
+
+Diagnose auf dem Ziel-Mac
+-------------------------
+Falls die App danach nicht startet, im Terminal "bash " eintippen, die beiliegende
+Datei "DIAGNOSE.command" hineinziehen und Enter drücken. Es entsteht eine Datei
+"DIAGNOSE-ERGEBNIS.txt". Sie enthält nur technische Angaben zu macOS, Prozessor,
+Paket, Signatur und Gatekeeper – keine Finanzdaten.
+
+Warum ist dieser Schritt nötig?
+-------------------------------
+Die App ist technisch signiert, aber noch nicht mit einer kostenpflichtigen
+Apple Developer ID signiert und von Apple notarisiert. Ohne dieses Zertifikat
+kann ein normaler Gatekeeper-Start auf einem anderen Mac nicht garantiert
+werden. Gib das Paket nur an Personen weiter, die dir als Absender vertrauen.
+
+Datensicherung und Umzug
+------------------------
+Unter Einstellungen > Datensicherung kann der vollständige Stand als JSON
+exportiert und auf dem anderen Mac wieder importiert werden. Vor jedem Import
+erstellt die App automatisch eine Sicherung des bisherigen Standes.
+
+CSV-Kontoauszüge können ebenfalls unter Einstellungen importiert werden. Vor dem
+Import lassen sich Bezeichnung, Art, Konto und Kategorie je Zeile prüfen. Einnahmen und
+Ausgaben werden automatisch am Vorzeichen erkannt; interne Bewegungen können als
+Umbuchung mit Gegenkonto markiert werden. Bereits vorhandene Zeilen und mögliche
+Duplikate werden in der Prüfliste markiert, damit überlappende Kontoauszüge keine
+Doppelbuchungen erzeugen.
+
+Belege
+------
+In einer Buchung lassen sich PDF- und Foto-Belege (PDF, JPEG, PNG, HEIC, TIFF, bis
+25 MB je Datei) anhängen. Sie werden lokal im Ordner "Belege" neben der Datenbank
+gespeichert und liegen wie die Datenbank unverschlüsselt vor. Die JSON-Sicherung
+enthält nur die Zuordnung, nicht die Dateien: Beim Umzug auf einen anderen Mac den
+Ordner "Belege" zusätzlich kopieren.
+
+Menüleiste
+----------
+Das Menüleisten-Symbol zeigt den frei verfügbaren Betrag und die nächsten Buchungen.
+Bei gesperrter App bleiben Beträge und Titel verborgen. Unter Einstellungen kann das
+Symbol ausgeschaltet und die Anzeige von Beträgen angepasst werden.
+
+PDF-Berichte
+------------
+Unter Statistik > PDF-Bericht können Quartale oder frei gewählte Zeiträume für alle
+Konten zusammen oder für ein einzelnes Konto exportiert werden. Der Bericht enthält
+Liquiditätsverlauf, Finanzfluss und Ausgabenanteile nach Kategorie.
+
+Die Datenbank liegt lokal unter:
+~/Library/Application Support/MeinFinanzplan/finanzplan.sqlite
+
+Die App benötigt keinen Browser, Webserver oder Online-Account.
+
+Aktualisieren
+-------------
+Bei kommenden Versionen "Mein Finanzplan Update.pkg" doppelklicken. Es aktualisiert
+nur die bereits vorhandene Anwendung. Die lokale Datenbank, Buchungen, Konten,
+Budgets und Einstellungen bleiben dabei erhalten.
+
+Deinstallation
+--------------
+Die App aus dem Programme-Ordner in den Papierkorb legen. Soll auch die lokale
+Datenbank entfernt werden, zusätzlich den oben genannten Datenordner löschen.

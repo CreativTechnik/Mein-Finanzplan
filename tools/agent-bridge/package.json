@@ -1,0 +1,30 @@
+{
+  "name": "@creativtechnik/agent-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "description": "Machine-wide MCP coordination bridge and local two-agent dashboard for Codex and Claude Code.",
+  "files": [
+    "bin",
+    "src",
+    "ui",
+    "README.md"
+  ],
+  "bin": {
+    "agent-bridge": "bin/agent-bridge.mjs"
+  },
+  "scripts": {
+    "check": "node --check src/core.mjs && node --check src/server.mjs && node --check src/dashboard.mjs && node --check bin/agent-bridge.mjs && node --test --test-concurrency=1 test/*.test.mjs",
+    "dashboard": "node bin/agent-bridge.mjs dashboard",
+    "mcp": "node src/server.mjs"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/client": "2.0.0",
+    "@modelcontextprotocol/server": "2.0.0",
+    "zod": "4.6.4"
+  }
+}

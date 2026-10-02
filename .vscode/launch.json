@@ -1,0 +1,44 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder}/native",
+            "name": "Debug MeinFinanzplan (native)",
+            "target": "MeinFinanzplan",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug MeinFinanzplan (native)"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder}/native",
+            "name": "Release MeinFinanzplan (native)",
+            "target": "MeinFinanzplan",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release MeinFinanzplan (native)"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder}/native",
+            "name": "Debug VerifyFinanceCore (native)",
+            "target": "VerifyFinanceCore",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug VerifyFinanceCore (native)"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder}/native",
+            "name": "Release VerifyFinanceCore (native)",
+            "target": "VerifyFinanceCore",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release VerifyFinanceCore (native)"
+        }
+    ]
+}

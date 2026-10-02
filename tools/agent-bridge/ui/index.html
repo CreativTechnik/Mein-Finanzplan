@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent Bridge</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --page: #edf1f6;
+      --surface: #f8fafc;
+      --surface-raised: #ffffff;
+      --surface-soft: #e7edf4;
+      --text: #142031;
+      --muted: #5c6979;
+      --line: #cbd4df;
+      --line-strong: #aebac8;
+      --accent: #1768c4;
+      --accent-strong: #0d4f98;
+      --accent-soft: #dceafb;
+      --on-accent: #f6f9fd;
+      --good: #277451;
+      --warn: #9b641c;
+      --danger: #a63e48;
+      --codex: #234d78;
+      --claude: #97543b;
+      --shadow: 0 24px 64px rgba(40, 57, 76, 0.13);
+      --radius-card: 18px;
+      --radius-control: 12px;
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --page: #11161d;
+        --surface: #171d25;
+        --surface-raised: #1d2530;
+        --surface-soft: #222c37;
+        --text: #e9eef5;
+        --muted: #9aa8b8;
+        --line: #34404d;
+        --line-strong: #4a5868;
+        --accent: #75a9e5;
+        --accent-strong: #2d659b;
+        --accent-soft: #203c59;
+        --on-accent: #f6f9fd;
+        --good: #72bf95;
+        --warn: #d4a661;
+        --danger: #dd7d85;
+        --codex: #8db8e5;
+        --claude: #d4997e;
+        --shadow: 0 28px 72px rgba(3, 7, 12, 0.36);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      background: var(--page);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    button, textarea, input { font: inherit; }
+    button { color: inherit; }
+    button, input, textarea { outline: none; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent);
+      border-color: var(--accent);
+    }
+
+    .shell {
+      width: min(1540px, calc(100% - 32px));
+      margin: 16px auto;
+      min-height: calc(100dvh - 32px);
+      display: grid;
+      grid-template-rows: auto 1fr;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .topbar {
+      min-height: 76px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--surface-raised) 92%, transparent);
+    }
+    .brand { display: flex; align-items: center; gap: 13px; min-width: 0; }
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      background: var(--text);
+      color: var(--surface-raised);
+      font-size: 12px;
+      font-weight: 760;
+      letter-spacing: -0.03em;
+    }
+    .brand-copy { min-width: 0; }
+    h1 { margin: 0; font-size: 18px; line-height: 1.15; letter-spacing: -0.025em; }
+    .project-path {
+      margin-top: 3px;
+      max-width: min(58vw, 760px);
+      color: var(--muted);
+      font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .top-actions { display: flex; gap: 8px; align-items: center; }
+
+    .layout {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+    }
+    .chat-panel {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto auto minmax(360px, 1fr) auto;
+    }
+    .agent-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 16px 20px 10px;
+    }
+    .agent-card {
+      min-width: 0;
+      padding: 13px 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-card);
+      background: var(--surface-raised);
+    }
+    .agent-name { display: flex; gap: 10px; align-items: center; font-weight: 680; }
+    .agent-symbol {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 780;
+      background: var(--surface-soft);
+    }
+    .agent-card[data-agent="codex"] .agent-symbol { color: var(--codex); }
+    .agent-card[data-agent="claude"] .agent-symbol { color: var(--claude); }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+    .status::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--line-strong);
+    }
+    .status[data-state="working"]::before { background: var(--accent); }
+    .status[data-state="done"]::before { background: var(--good); }
+    .status[data-state="error"]::before { background: var(--danger); }
+
+    .messages {
+      min-height: 0;
+      overflow-y: auto;
+      padding: 18px 20px 28px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--line-strong) transparent;
+    }
+    .empty {
+      height: 100%;
+      min-height: 280px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+    }
+    .empty strong { display: block; color: var(--text); font-size: 20px; letter-spacing: -0.025em; margin-bottom: 6px; }
+    .message { max-width: 82%; margin: 0 0 18px; }
+    .message[data-sender="user"] { margin-left: auto; }
+    .message-meta {
+      display: flex;
+      gap: 9px;
+      align-items: baseline;
+      margin: 0 3px 6px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+    .message[data-sender="user"] .message-meta { justify-content: flex-end; }
+    .message-author { color: var(--text); font-weight: 700; }
+    .message-body {
+      padding: 13px 15px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-card);
+      background: var(--surface-raised);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .message[data-sender="user"] .message-body {
+      border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+      background: var(--accent-soft);
+    }
+    .message[data-sender="codex"] .message-author { color: var(--codex); }
+    .message[data-sender="claude"] .message-author { color: var(--claude); }
+    .message[data-kind="error"] .message-body { border-color: var(--danger); color: var(--danger); }
+    .message[data-kind="peer_review"] .message-body { border-style: dashed; }
+
+    .composer-wrap {
+      padding: 12px 20px 20px;
+      background: var(--surface);
+    }
+    .composer {
+      padding: 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-card);
+      background: var(--surface-raised);
+      box-shadow: 0 8px 28px color-mix(in srgb, var(--text) 7%, transparent);
+    }
+    .composer label { display: block; font-size: 12px; color: var(--muted); margin: 0 2px 7px; }
+    textarea {
+      width: 100%;
+      min-height: 78px;
+      max-height: 220px;
+      resize: vertical;
+      padding: 10px 11px;
+      border: 1px solid transparent;
+      border-radius: var(--radius-control);
+      background: var(--surface-soft);
+      color: var(--text);
+    }
+    textarea::placeholder, input::placeholder { color: color-mix(in srgb, var(--muted) 85%, transparent); }
+    .composer-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 10px;
+    }
+    .targets { display: flex; gap: 12px; flex-wrap: wrap; }
+    .target { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; cursor: pointer; }
+    .target input { accent-color: var(--accent); }
+    .button-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+
+    .button {
+      min-height: 36px;
+      padding: 8px 13px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-control);
+      background: var(--surface-raised);
+      cursor: pointer;
+      font-weight: 680;
+      white-space: nowrap;
+      transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease;
+    }
+    .button:hover { border-color: var(--accent); }
+    .button:active { transform: translateY(1px); }
+    .button.primary { color: var(--on-accent); background: var(--accent-strong); border-color: var(--accent-strong); }
+    .button.primary:hover { background: color-mix(in srgb, var(--accent-strong) 82%, var(--text)); }
+    .button.quiet { color: var(--muted); }
+    .button.small { min-height: 30px; padding: 5px 9px; font-size: 12px; }
+    .button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .sidebar {
+      min-height: 0;
+      overflow-y: auto;
+      border-left: 1px solid var(--line);
+      background: var(--surface-raised);
+      padding: 20px;
+    }
+    .side-section + .side-section { margin-top: 30px; }
+    .side-heading {
+      margin: 0 0 12px;
+      font-size: 14px;
+      letter-spacing: -0.01em;
+    }
+    .repo-grid { display: grid; grid-template-columns: auto 1fr; gap: 8px 13px; font-size: 12px; }
+    .repo-grid dt { color: var(--muted); }
+    .repo-grid dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+    .mono { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; }
+    .good { color: var(--good); }
+    .danger { color: var(--danger); }
+
+    .task-list { display: grid; gap: 10px; }
+    .task {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-card);
+      background: var(--surface);
+    }
+    .task-title { font-weight: 700; margin-bottom: 5px; }
+    .task-meta { color: var(--muted); font-size: 11px; }
+    .task-files { margin-top: 8px; color: var(--muted); font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; font-size: 11px; overflow-wrap: anywhere; }
+    .task-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .badge {
+      display: inline-flex;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: var(--surface-soft);
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 720;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .new-task { display: none; margin-top: 12px; gap: 10px; }
+    .new-task.open { display: grid; }
+    .field { display: grid; gap: 5px; }
+    .field label { color: var(--muted); font-size: 11px; }
+    .field input, .field textarea {
+      width: 100%;
+      min-height: 38px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-control);
+      background: var(--surface);
+      color: var(--text);
+    }
+    .field textarea { min-height: 64px; }
+    .notice { margin: 10px 0 0; color: var(--muted); font-size: 11px; }
+    .error-banner {
+      display: none;
+      margin: 0 20px 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--danger);
+      border-radius: var(--radius-control);
+      color: var(--danger);
+      background: color-mix(in srgb, var(--danger) 8%, transparent);
+    }
+    .error-banner.visible { display: block; }
+    .error-banner[data-tone="info"] {
+      border-color: var(--accent);
+      color: var(--text);
+      background: color-mix(in srgb, var(--accent) 9%, transparent);
+    }
+
+    @media (max-width: 980px) {
+      .shell { width: min(100% - 16px, 900px); margin: 8px auto; min-height: calc(100dvh - 16px); border-radius: 18px; }
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { border-left: 0; border-top: 1px solid var(--line); overflow: visible; }
+      .chat-panel { min-height: 720px; }
+    }
+    @media (max-width: 640px) {
+      .topbar { align-items: flex-start; padding: 14px; }
+      .top-actions .button.quiet { display: none; }
+      .agent-strip { grid-template-columns: 1fr; padding: 12px 14px 6px; }
+      .messages { padding: 14px; }
+      .message { max-width: 94%; }
+      .composer-wrap { padding: 8px 14px 14px; }
+      .composer-footer { align-items: flex-start; flex-direction: column; }
+      .button-row { width: 100%; justify-content: stretch; }
+      .button-row .button { flex: 1; }
+      .sidebar { padding: 18px 14px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">AB</div>
+        <div class="brand-copy">
+          <h1>Agent Bridge</h1>
+          <div class="project-path" id="project-path">Projekt wird geladen</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="button quiet" id="init-project" type="button">Projektdateien prüfen</button>
+        <button class="button" id="refresh" type="button">Aktualisieren</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <section class="chat-panel" aria-label="Gemeinsamer Agentenchat">
+        <div class="agent-strip">
+          <article class="agent-card" data-agent="codex">
+            <div class="agent-name"><span class="agent-symbol">CO</span>Codex</div>
+            <span class="status" id="codex-status">Bereit</span>
+          </article>
+          <article class="agent-card" data-agent="claude">
+            <div class="agent-name"><span class="agent-symbol">CL</span>Claude</div>
+            <span class="status" id="claude-status">Bereit</span>
+          </article>
+        </div>
+
+        <div class="error-banner" id="error" role="alert"></div>
+        <div class="messages" id="messages" aria-live="polite">
+          <div class="empty"><div><strong>Gemeinsam denken</strong>Schreibe beiden Agenten oder lege eine Aufgabe im Repository an.</div></div>
+        </div>
+
+        <div class="composer-wrap">
+          <form class="composer" id="composer">
+            <label for="message-input">Nachricht an die Agenten</label>
+            <textarea id="message-input" placeholder="Beschreibe die Aufgabe oder stelle eine technische Frage." required></textarea>
+            <div class="composer-footer">
+              <div class="targets" aria-label="Empfänger">
+                <label class="target"><input type="checkbox" name="target" value="codex" checked> Codex</label>
+                <label class="target"><input type="checkbox" name="target" value="claude" checked> Claude</label>
+              </div>
+              <div class="button-row">
+                <button class="button quiet" id="store-message" type="button">Nur ablegen</button>
+                <button class="button quiet" id="peer-review" type="button">Gegenseitig prüfen</button>
+                <button class="button primary" id="send" type="submit">Antworten lassen</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <aside class="sidebar" aria-label="Repository und Aufgaben">
+        <section class="side-section">
+          <h2 class="side-heading">Repository</h2>
+          <dl class="repo-grid">
+            <dt>Branch</dt><dd class="mono" id="branch">Laden</dd>
+            <dt>Arbeitsbaum</dt><dd id="clean-state">Laden</dd>
+            <dt>Offene Aufgaben</dt><dd id="task-count">0</dd>
+            <dt>Letzte Prüfung</dt><dd id="updated-at">Laden</dd>
+          </dl>
+        </section>
+
+        <section class="side-section">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <h2 class="side-heading" style="margin:0">Aufgaben</h2>
+            <button class="button small" id="toggle-task" type="button">Neue Aufgabe</button>
+          </div>
+          <form class="new-task" id="new-task">
+            <div class="field">
+              <label for="task-title">Titel</label>
+              <input id="task-title" required>
+            </div>
+            <div class="field">
+              <label for="task-description">Beschreibung</label>
+              <textarea id="task-description" required></textarea>
+            </div>
+            <div class="field">
+              <label for="task-files">Dateien, durch Komma oder Zeile getrennt</label>
+              <textarea id="task-files" class="mono" placeholder="src/app.js"></textarea>
+            </div>
+            <button class="button primary" type="submit">Aufgabe anlegen</button>
+          </form>
+          <div class="task-list" id="tasks"></div>
+          <p class="notice">Bearbeiter, Reviewer und Integrator werden je Aufgabe vergeben. Kein Agent ist dauerhaft übergeordnet.</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const state = { csrfToken: "", data: null, lastMessageId: 0 };
+    const byId = id => document.getElementById(id);
+
+    function showBanner(message, tone = "error") {
+      const element = byId("error");
+      element.textContent = message || "";
+      element.dataset.tone = tone;
+      element.classList.toggle("visible", Boolean(message));
+    }
+
+    function showError(message) {
+      showBanner(message, "error");
+    }
+
+    async function api(path, options = {}) {
+      const response = await fetch(`.${path}`, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-Agent-Bridge-Token": state.csrfToken,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Anfrage fehlgeschlagen.");
+      return payload;
+    }
+
+    function parseAgentStatus(name, raw, activeRuns) {
+      const running = activeRuns.find(item => item.agent === name);
+      if (running) return { text: running.kind === "peer_review" ? "Prüft Gegenentwurf" : "Antwortet", state: "working" };
+      const title = name === "codex" ? "Codex" : "Claude";
+      const match = String(raw || "").match(new RegExp(`--- ${title} ---([\\s\\S]*?)(?=---|$)`, "i"));
+      const status = match && match[1].match(/Status:\s*([^\n]+)/i);
+      if (!status) return { text: "Bereit", state: "idle" };
+      const value = status[1].trim().toLowerCase();
+      if (value === "working") return { text: "Arbeitet im Repository", state: "working" };
+      if (value === "done") return { text: "Bereit", state: "done" };
+      return { text: status[1].trim(), state: "idle" };
+    }
+
+    function formatTime(value) {
+      if (!value) return "";
+      return new Intl.DateTimeFormat("de-DE", { hour: "2-digit", minute: "2-digit" }).format(new Date(value));
+    }
+
+    function senderName(sender) {
+      return sender === "user" ? "Du" : sender === "system" ? "Agent Bridge" : sender === "codex" ? "Codex" : "Claude";
+    }
+
+    function renderMessages(messages) {
+      const container = byId("messages");
+      const wasNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+      if (!messages.length) {
+        container.innerHTML = '<div class="empty"><div><strong>Gemeinsam denken</strong>Schreibe beiden Agenten oder lege eine Aufgabe im Repository an.</div></div>';
+        return;
+      }
+      container.replaceChildren(...messages.map(message => {
+        const article = document.createElement("article");
+        article.className = "message";
+        article.dataset.sender = message.sender;
+        article.dataset.kind = message.kind;
+        const meta = document.createElement("div");
+        meta.className = "message-meta";
+        const author = document.createElement("span");
+        author.className = "message-author";
+        author.textContent = senderName(message.sender);
+        const time = document.createElement("time");
+        time.dateTime = message.createdAt;
+        time.textContent = formatTime(message.createdAt);
+        meta.append(author, time);
+        const body = document.createElement("div");
+        body.className = "message-body";
+        body.textContent = message.body;
+        article.append(meta, body);
+        return article;
+      }));
+      const newest = messages[messages.length - 1]?.id || 0;
+      if (wasNearBottom || newest > state.lastMessageId) container.scrollTop = container.scrollHeight;
+      state.lastMessageId = newest;
+    }
+
+    function taskButtons(task) {
+      const fragment = document.createDocumentFragment();
+      const button = (label, action) => {
+        const element = document.createElement("button");
+        element.type = "button";
+        element.className = "button small quiet";
+        element.textContent = label;
+        element.addEventListener("click", action);
+        fragment.append(element);
+      };
+      if (task.status === "open") {
+        button("Codex übernimmt", () => taskAction(task, "claim", { agent: "codex", files: task.files }));
+        button("Claude übernimmt", () => taskAction(task, "claim", { agent: "claude", files: task.files }));
+      }
+      if (["active", "changes_requested"].includes(task.status)) {
+        button("Zum Review", async () => {
+          const summary = window.prompt("Welche Änderungen und Tests sollen geprüft werden?");
+          if (summary) await taskAction(task, "submit", { agent: task.owner, summary });
+        });
+      }
+      if (task.status === "review") {
+        const reviewer = task.owner === "codex" ? "claude" : "codex";
+        button("Freigeben", async () => {
+          const note = window.prompt("Review-Ergebnis", "Geprüft und freigegeben.");
+          if (note) await taskAction(task, "review", { reviewer, verdict: "approved", note });
+        });
+        button("Änderung nötig", async () => {
+          const note = window.prompt("Welche Änderung ist nötig?");
+          if (note) await taskAction(task, "review", { reviewer, verdict: "changes_requested", note });
+        });
+      }
+      if (task.status === "ready") {
+        for (const agent of ["codex", "claude"]) {
+          button(`${agent === "codex" ? "Codex" : "Claude"} integriert`, async () => {
+            const summary = window.prompt("Integrations- und Testergebnis");
+            if (summary) await taskAction(task, "integrate", { agent, summary });
+          });
+        }
+      }
+      return fragment;
+    }
+
+    function renderTasks(tasks) {
+      const container = byId("tasks");
+      const open = tasks.filter(task => task.status !== "done");
+      byId("task-count").textContent = String(open.length);
+      if (!tasks.length) {
+        container.innerHTML = '<p class="notice">Noch keine Aufgaben im Agent Bridge Speicher.</p>';
+        return;
+      }
+      container.replaceChildren(...tasks.slice(0, 12).map(task => {
+        const article = document.createElement("article");
+        article.className = "task";
+        const title = document.createElement("div");
+        title.className = "task-title";
+        title.textContent = task.title;
+        const meta = document.createElement("div");
+        meta.className = "task-meta";
+        meta.textContent = [task.status, task.owner && `Bearbeitung: ${task.owner}`, task.reviewer && `Review: ${task.reviewer}`].filter(Boolean).join(" | ");
+        const badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = task.status;
+        const files = document.createElement("div");
+        files.className = "task-files";
+        files.textContent = task.files.length ? task.files.join("\n") : "Keine Dateien reserviert";
+        const actions = document.createElement("div");
+        actions.className = "task-actions";
+        actions.append(taskButtons(task));
+        article.append(badge, title, meta, files, actions);
+        return article;
+      }));
+    }
+
+    function render(data) {
+      state.data = data;
+      state.csrfToken = data.csrfToken || state.csrfToken;
+      byId("project-path").textContent = data.project.path;
+      byId("branch").textContent = data.git.branch || "Kein Git";
+      byId("clean-state").textContent = data.git.clean ? "Sauber" : "Änderungen vorhanden";
+      byId("clean-state").className = data.git.clean ? "good" : "danger";
+      byId("updated-at").textContent = formatTime(data.generatedAt);
+      const codex = parseAgentStatus("codex", data.agents.text, data.runtime.activeRuns);
+      const claude = parseAgentStatus("claude", data.agents.text, data.runtime.activeRuns);
+      byId("codex-status").textContent = codex.text;
+      byId("codex-status").dataset.state = codex.state;
+      byId("claude-status").textContent = claude.text;
+      byId("claude-status").dataset.state = claude.state;
+      renderMessages(data.messages);
+      renderTasks(data.tasks);
+      const isRunning = data.runtime.activeRuns.length > 0;
+      byId("send").disabled = isRunning;
+      byId("peer-review").disabled = isRunning;
+    }
+
+    async function load() {
+      try {
+        showError("");
+        const response = await fetch("./api/state", { cache: "no-store" });
+        render(await response.json());
+      } catch (error) {
+        showError(error.message);
+      }
+    }
+
+    function selectedTargets() {
+      return [...document.querySelectorAll('input[name="target"]:checked')].map(input => input.value);
+    }
+
+    async function sendMessage(runAgents) {
+      const input = byId("message-input");
+      const body = input.value.trim();
+      if (!body) return;
+      const targets = selectedTargets();
+      if (!targets.length) return showError("Wähle mindestens einen Agenten aus.");
+      try {
+        showError("");
+        await api(runAgents ? "/api/chat" : "/api/message", {
+          method: "POST",
+          body: JSON.stringify({ body, targets })
+        });
+        input.value = "";
+      } catch (error) {
+        showError(error.message);
+      }
+    }
+
+    async function taskAction(task, action, body) {
+      try {
+        showError("");
+        await api(`/api/tasks/${encodeURIComponent(task.id)}/${action}`, { method: "POST", body: JSON.stringify(body) });
+      } catch (error) {
+        showError(error.message);
+      }
+    }
+
+    byId("composer").addEventListener("submit", event => { event.preventDefault(); void sendMessage(true); });
+    byId("store-message").addEventListener("click", () => void sendMessage(false));
+    byId("refresh").addEventListener("click", () => void load());
+    byId("peer-review").addEventListener("click", async () => {
+      try {
+        showError("");
+        await api("/api/peer-review", { method: "POST", body: JSON.stringify({}) });
+      } catch (error) {
+        showError(error.message);
+      }
+    });
+    byId("init-project").addEventListener("click", async () => {
+      try {
+        const result = await api("/api/project/init", { method: "POST", body: "{}" });
+        showBanner(result.created.length ? `Erstellt: ${result.created.join(", ")}` : "Alle gemeinsamen Projektdateien sind vorhanden.", "info");
+      } catch (error) {
+        showError(error.message);
+      }
+    });
+    byId("toggle-task").addEventListener("click", () => byId("new-task").classList.toggle("open"));
+    byId("new-task").addEventListener("submit", async event => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const files = byId("task-files").value.split(/[\n,]/).map(value => value.trim()).filter(Boolean);
+      try {
+        showError("");
+        await api("/api/tasks", {
+          method: "POST",
+          body: JSON.stringify({
+            title: byId("task-title").value,
+            description: byId("task-description").value,
+            files
+          })
+        });
+        form.reset();
+        form.classList.remove("open");
+      } catch (error) {
+        showError(error.message);
+      }
+    });
+
+    void load().then(() => {
+      const events = new EventSource("./api/events");
+      events.addEventListener("state", event => render(JSON.parse(event.data)));
+      events.onerror = () => showError("Live-Verbindung unterbrochen. Agent Bridge versucht die Verbindung erneut.");
+      events.onopen = () => showError("");
+    });
+  </script>
+</body>
+</html>
